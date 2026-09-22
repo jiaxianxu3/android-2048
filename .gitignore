@@ -1,0 +1,12 @@
+# Buildozer / python-for-android 构建产物
+.buildozer/
+bin/
+.build/
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# 运行期本地存档（不应入库）
+save_game_*.json

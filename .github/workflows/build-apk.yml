@@ -1,0 +1,29 @@
+name: 构建 2048 双模式 APK
+
+on:
+  workflow_dispatch:        # 手动触发
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 用 Buildozer 构建 APK
+        uses: ArtemSBulgakov/buildozer-action@v2
+        id: buildozer
+        with:
+          command: buildozer android debug
+          buildozer_version: "1.5.1"
+
+      - name: 上传 APK 产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: game2048-dual-apk
+          path: bin/*.apk
+          if-no-files-found: error
