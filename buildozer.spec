@@ -16,7 +16,7 @@ source.include_exts = py,png,jpg,jpeg,json,ttf
 source.include_patterns = *.py
 
 # (list) 依赖
-requirements = python3==3.11.9, kivy==2.3.0
+requirements = kivy==2.3.0
 
 # (str) 入口文件
 entrypoint = main.py
