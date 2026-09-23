@@ -7,6 +7,9 @@ title = 2048双模式
 package.name = game2048dual
 package.domain = org.workbuddy
 
+# (str) 应用版本（buildozer 必需，否则配置校验不通过）
+version = 1.0.0
+
 # (str) 源码目录（buildozer 以本文件所在目录为根）
 source.dir = .
 source.include_exts = py,png,jpg,jpeg,json,ttf
