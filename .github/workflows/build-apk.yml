@@ -15,11 +15,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 用 Buildozer 构建 APK
-        uses: ArtemSBulgakov/buildozer-action@v2
+        uses: ArtemSBulgakov/buildozer-action@v1
         id: buildozer
         with:
           command: buildozer android debug
-          buildozer_version: "1.5.1"
+          buildozer_version: stable
 
       - name: 上传 APK 产物
         uses: actions/upload-artifact@v4
