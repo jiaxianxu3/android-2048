@@ -10,16 +10,34 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     steps:
       - name: 拉取代码
         uses: actions/checkout@v4
 
-      - name: 用 Buildozer 构建 APK
-        uses: ArtemSBulgakov/buildozer-action@v1
-        id: buildozer
-        with:
-          command: buildozer android debug
-          buildozer_version: stable
+      - name: 安装构建依赖（标准 Ubuntu 源，无第三方 PPA）
+        run: |
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            python3 python3-pip python3-venv python3-dev \
+            build-essential git zip unzip curl pkg-config \
+            openjdk-17-jdk autoconf libtool automake \
+            libssl-dev libffi-dev zlib1g-dev libbz2-dev \
+            libsqlite3-dev libncurses-dev liblzma-dev libgdbm-dev \
+            tk-dev uuid-dev libreadline-dev libxml2-dev libxslt1-dev
+
+      - name: 安装 Buildozer
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install --upgrade buildozer
+
+      - name: 构建 APK
+        timeout-minutes: 100
+        env:
+          JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+        run: |
+          export JAVA_HOME="${JAVA_HOME:-$(readlink -f $(which java) | sed 's:/bin/java::')}"
+          buildozer android debug
 
       - name: 上传 APK 产物
         uses: actions/upload-artifact@v4
