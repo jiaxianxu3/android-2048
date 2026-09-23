@@ -38,7 +38,7 @@ android.api = 34
 android.minapi = 21
 android.ndk = 25b
 android.accept_sdk_license = True
-android.arch = arm64-v8a
+android.archs = arm64-v8a
 
 # (bool) 是否用 AIDL/内容提供：关闭
 android.create_release = False
