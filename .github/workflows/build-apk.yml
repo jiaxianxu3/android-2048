@@ -11,44 +11,61 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 120
+
+    env:
+      JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+      ACLOCAL_PATH: /usr/share/aclocal
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
     steps:
       - name: 拉取代码
         uses: actions/checkout@v4
 
-      - name: 安装构建依赖（标准 Ubuntu 源，无第三方 PPA）
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: 安装构建依赖
         run: |
           sudo apt-get update
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
-            python3 python3-pip python3-venv python3-dev \
-            build-essential git zip unzip curl pkg-config \
+            python3-dev build-essential git zip unzip curl pkg-config \
             openjdk-17-jdk autoconf automake libtool libtool-bin \
             libssl-dev libffi-dev zlib1g-dev libbz2-dev \
             libsqlite3-dev libncurses-dev liblzma-dev libgdbm-dev \
             tk-dev uuid-dev libreadline-dev libxml2-dev libxslt1-dev
-          # 让 Libtool 的 Autoconf 宏对 aclocal/autoreconf 可见（修复 LT_SYS_SYMBOL_USCORE 未定义）
-          export ACLOCAL_PATH="/usr/share/aclocal${ACLOCAL_PATH:+:$ACLOCAL_PATH}"
+
           test -f /usr/share/aclocal/libtool.m4
           grep -q 'LT_SYS_SYMBOL_USCORE' /usr/share/aclocal/libtool.m4
 
-      - name: 安装 Buildozer
+      - name: 创建 Python 环境
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install --upgrade buildozer
+          python -m venv .venv
+          . .venv/bin/activate
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install "buildozer==1.5.0"
 
       - name: 清理失败的构建缓存
         run: |
-          rm -rf .buildozer
-          rm -rf bin
+          rm -rf .buildozer bin
 
       - name: 构建 APK
         timeout-minutes: 100
-        env:
-          JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
-          ACLOCAL_PATH: /usr/share/aclocal
         run: |
-          export JAVA_HOME="${JAVA_HOME:-$(readlink -f $(which java) | sed 's:/bin/java::')}"
-          export PATH="/usr/bin:$PATH"
-          buildozer android debug
+          set -euxo pipefail
+          . .venv/bin/activate
+          export PATH="$GITHUB_WORKSPACE/.venv/bin:/usr/bin:$PATH"
+          buildozer android debug 2>&1 | tee buildozer.log
+
+      - name: 上传构建日志
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: buildozer-log
+          path: buildozer.log
+          if-no-files-found: ignore
 
       - name: 上传 APK 产物
         uses: actions/upload-artifact@v4
