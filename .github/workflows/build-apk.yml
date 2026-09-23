@@ -57,6 +57,16 @@ jobs:
           . .venv/bin/activate
           export PATH="$GITHUB_WORKSPACE/.venv/bin:/usr/bin:$PATH"
           buildozer android debug 2>&1 | tee buildozer.log
+          echo "== 构建产物校验 =="
+          ls -la bin/*.apk
+
+      - name: 列出生成的 APK（诊断用，始终执行）
+        if: always()
+        run: |
+          echo "== 全盘查找 *.apk =="
+          find "$GITHUB_WORKSPACE" -name '*.apk' -type f | sort
+          echo "== bin 目录内容 =="
+          ls -la "$GITHUB_WORKSPACE/bin" 2>/dev/null || echo "bin 目录不存在"
 
       - name: 上传构建日志
         if: always()
